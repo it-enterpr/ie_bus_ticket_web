@@ -8,7 +8,7 @@
 
     "website": "https://www.it-enterprise.solutions",
 
-    "support": "support@it-enterprise.cz",
+    "support": "support@it-enterprise.cz", 
 
     "version": "0.0.1",
 
