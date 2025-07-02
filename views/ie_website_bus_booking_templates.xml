@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="ie_bus_booking_front_product_cart" inherit_id="website_sale.cart" name="Request for Quote multi Product Shopping Cart">
+        <xpath expr="//t[@t-call='website_sale.cart_lines']" position="before">
+            <div class="row mb-4 mt-3" 
+            t-if="website_sale_order and website_sale_order.website_order_line and website_sale_order.trip_id"
+            style="border: 1px solid #cccc; padding: 15px 10px; width: 99%; margin-left: 4px; border-radius: 5px;">
+                <t t-set="line_counter" t-value="1" />
+                <t t-esc="website_sale_order.website_order_line"/>
+                <t t-foreach="website_sale_order.website_order_line" t-as="line">
+                    <t t-if="line_counter==1">
+                        <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                            <t t-if="line.bording_from and line.to.name">
+                                <strong class="travel-detail-cart">From : </strong>
+                                <span t-field="line.bording_from.name" />
+                                <br />
+                                <strong class="travel-detail-cart">To : </strong>
+                                <span t-field="line.to.name" />
+                            </t>
+                        </div>
+                        <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                            <t t-if="line.boarding_point">
+                                <strong class="travel-detail-cart">Boarding Point : </strong>
+                                <span t-field="line.boarding_point.name" />
+                                <br />
+                            </t>
+                            <t t-if="line.dropping_point">
+                                <strong class="travel-detail-cart">Dropping Point : </strong>
+                                <span t-field="line.dropping_point.name" />
+                            </t>
+                        </div>
+                        <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                            <t t-if="line.departure_time and line.arrival_time">
+                                <strong class="travel-detail-cart">Departure : </strong>
+                                <span t-field="line.departure_time" />
+                                <br />
+                                <strong class="travel-detail-cart">Arrival : </strong>
+                                <span t-field="line.arrival_time" />
+                            </t>
+                        </div>
+                        <t t-set="line_counter" t-value="0" />
+                    </t>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="ie_bus_booking_front_product_cart_lines" inherit_id="website_sale.cart_lines" name="ie_bus_web Shopping Cart Lines">
+        <xpath expr="//div[@id='cart_products']" position="attributes">
+            <attribute name="t-if">website_sale_order and website_sale_order.website_order_line and not website_sale_order.trip_id</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('js_cart_lines')]" position="after">
+            <!-- <t t-set="show_qty" t-value="is_view_active('website_sale.product_quantity')"/> -->
+
+            <t t-if="website_sale_order.trip_id">
+                <table class="mb16 table table-striped table-sm js_cart_lines" id="cart_products" t-if="website_sale_order and website_sale_order.website_order_line">
+                    <thead>
+                        <tr>
+                            <th class="text-center">SEAT NO.</th>
+                            <th class="">PASSENGER NAME</th>
+                            <th class="text-center td-qty">GENDER</th>
+                            <th class="text-center td-price">AGE</th>
+                            <th class="text-center td-action"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="website_sale_order.website_order_line" t-as="line">
+                            <tr t-attf-class="o_cart_product {{'optional_product info' if line.linked_line_id else ''}} " >
+                                <td class="text-center">
+                                    <strong t-field="line.seat" />
+                                </td>
+                                <td align="left">
+                                    <strong t-field="line.p_name" />
+                                </td>
+                                <td class="text-center td-qty">
+                                    <span t-field="line.p_gender" />
+                                </td>
+                                <td class="text-center td-price" name="price">
+                                    <span t-field="line.p_age" />
+                                </td>
+                                <td class="td-action">
+                                    <input type="hidden"
+                                    class="js_quantity form-control quantity"
+                                    t-att-data-line-id="line.id"
+                                    t-att-data-product-id="line.product_id.id"
+                                    t-att-value="int(line.product_uom_qty) == line.product_uom_qty and int(line.product_uom_qty) or line.product_uom_qty"/>
+
+                                    <a href="#" aria-label="Remove from cart" title="Remove from cart" class="js_delete_product no-decoration">
+                                        <small>
+                                            <i title="remove from cart" class="fa fa-trash-o"></i>
+                                        </small>
+                                    </a>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+        </xpath>
+    </template>
+    <template id="seat_booking_template" name="Seat Booking Template">
+        <div class="modal fade" t-att-id="'myModal%s00' %(search_id.id)">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <!-- Modal body -->
+                    <div class="modal-body" id="ie_book_ticket">
+                        <!-- Modal -->
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                        <div class="heading_title">
+                            <h3 class="text-primary">Book Ticket</h3>
+                            <button type="button" class="btn btn_cross" data-bs-dismiss="modal">
+                                <span class="fa fa-times"></span>
+                            </button>
+                        </div>
+                        <hr />
+                        <div id="wrap">
+                            <div class="oe_structure" />
+                            <div class="container">
+                                <input type="hidden" id="search_id" t-att-value="search_id" />
+                                <div id="jquery-script-menu">
+                                    <div class="jquery-script-center">
+                                        <div class="jquery-script-clear"></div>
+                                    </div>
+                                </div>
+                                <div class="wrapper">
+                                    <div class="container">
+                                        <h1></h1>
+                                        <div class="row" id="seat_layout">
+                                            <div class="col-lg-6 col-md-12 col-sm-12 col-12" style="border-right: 1px dotted #adadad;">
+                                                <div class="seat_layout_left">
+                                                    <div t-att-class="'front-seating-map-%s' %(search_id.id)"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 col-md-12 col-sm-12 col-12" style="padding-left: 10px;">
+                                                <div class="booking-details" style="padding: 10px; font-size: 12px;">
+                                                    <div class="front-indicator" style="font-size: 14px; display: none;">Seat Selection Information</div>
+                                                    <h3 class="text-primary">
+                                                        Selected Seats (
+                                                        <span t-att-id="'counter-%s' %(search_id.id)">0</span>
+                                                        ):
+                                                    </h3>
+                                                    <div class="row">
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                                                            <ul class="selected-seats" t-att-id="'selected-seats-%s' %(search_id.id)" style="padding-left: 0px;"></ul>
+                                                            <span class="total">Total:</span>
+                                                            <b>
+                                                                <span t-att-id="'currency_symbol_%s'  %(search_id.id)" />
+                                                                <span t-att-id="'total-%s' %(search_id.id)">0</span>
+                                                            </b>
+                                                            <div id="legend" t-att-class="'legend-%s' %(search_id.id)"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div t-att-class="'boarding-point_%s' %(search_id.id)" style="padding: 10px;"></div>
+                                                    <div t-att-class="'dropping-point_%s' %(search_id.id)" style="padding: 10px;"></div>
+                                                    <div t-att-class="'amenities_list_%s' %(search_id.id)" style="padding: 10px;"></div>
+                                                    <button id="checkout-button" t-att-class="'btn btn-primary btn-checkout checkout-button-%s' %(search_id.id)">Checkout</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div t-att-class="'row passenger_info_title passenger_info_%s' %(search_id.id)" style="visibility: hidden;">
+                                            <div class="col-12 mt-5 ">
+                                                <div class="front-indicator" style="font-size: 12px; margin-bottom: 15px;">
+                                                    <div class="heading_title">
+                                                        <h3 class="text-primary">Passenger Information</h3>
+                                                    </div>
+                                                </div>
+                                                <div t-att-class="'passenger_info_tab passenger_info_%s' %(search_id.id)" style="visibility: hidden;">
+                                                    <table class="pi_table">
+                                                        <thead>
+                                                            <th>#</th>
+                                                            <th>NAME</th>
+                                                            <th>EMAIL</th>
+                                                            <th>AGE</th>
+                                                            <th>GENDER</th>
+                                                        </thead>
+                                                        <tbody t-att-class="'passenger-detail_%s' %(search_id.id)" id="ie_passenger_detail"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button id="go-button" t-att-class="'btn btn-primary btn-go go-button-%s' %(search_id.id)" style="visibility: hidden;">GO</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="website_bus_booking_template" name="Bus Booking Template">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_bus_booking_1" />
+                <t t-if="main_form or edit_translations">
+                    <!-- Banner -->
+                    <section id="ie_bus_banner">
+                        <div class="banner_content">
+                            <div class="o_wevent_event_title" style="text-align:center;">
+                                <h3 class="text-white">Bus Booking</h3>
+                                <p class="text-white">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                                    <br />
+                                    incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Booking Details -->
+                    <section class="container d-flex flex-column flex-grow-1 justify-content-around" id="ie_booking_details">
+                        <form id="registration_form1" t-attf-action="/busBooking" method="post">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                            <div class="row">
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-12 text-center" style="position: relative;">
+                                    <select name="start_point" id="start_point" class="selectpicker" required="required">
+                                        <option value="" disabled="disabled" selected="selected">Choose Start Point</option>
+                                        <t t-foreach="points" t-as="point">
+                                            <option t-att-value="point.id">
+                                                <t t-esc="point.name" />
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <span class="fa fa-caret-down"></span>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-12 text-center" style="position: relative;">
+                                    <select name="end_point" id="end_point" class="selectpicker" required="required">
+                                        <option value="" disabled="disabled" selected="selected">Choose End Point</option>
+                                        <t t-foreach="points" t-as="point">
+                                            <option t-att-value="point.id">
+                                                <t t-esc="point.name" />
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <span class="fa fa-caret-down"></span>
+                                </div>
+                                <div class="col-lg-2 col-md-6 col-sm-12 col-12 text-center" style="position: relative;">
+                                    <t t-set="minimum_date" t-value="str((datetime.datetime.now()).strftime('%Y-%m-%d'))" />
+
+                                    <input type="date" name="date" id="datepicker" placeholder="Date" t-att-value="time.strftime('%Y-%m-%d')" t-att-min="str(minimum_date)" class="form-control" required="required"></input>
+
+                                </div>
+
+                                <div class="col-lg-2 col-md-6 col-sm-12 col-12 text-center pl10 pr10" style="position: relative;">
+                                    <select name="fleet_type" id="fleet_type" class="selectpicker">
+                                        <option value="" selected="selected">Choose Fleet Type</option>
+                                        <t t-foreach="bus_types" t-as="bus_type">
+                                            <option t-att-value="bus_type.id">
+                                                <t t-esc="bus_type.name" />
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <span class="fa fa-caret-down"></span>
+                                </div>
+                                <div class="col-lg-2 col-md-12 col-sm-12 col-12 text-center" style="position: relative;">
+                                    <button type="submit" class="btn btn-primary btn_find">Find Now</button>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                    <!-- About Us -->
+                    <section id="ie_about_us">
+                        <div class="container">
+                            <div class="heading_title">
+                                <h3 class="text-primary">About Us</h3>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                                    <br />
+                                    incididunt ut labore et dolore magna aliqua
+                                </p>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-12 col-sm-12 col-12">
+                                    <div class="left_text">
+                                        <h3 class="o_default_snippet_text">
+                                            Lorem ipsum dolor sit amet consectetur
+                                            <span class="o_default_snippet_text">adipiscing</span>
+                                            elit
+                                        </h3>
+                                        <p class="o_default_snippet_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
+                                        <p class="o_default_snippet_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                                        <p class="o_default_snippet_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-12 col-sm-12 col-12">
+                                    <div class="right_image">
+                                        <img src="/ie_bus_web/static/src/img/about_us2.jpg" title='' alt="Image" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Service -->
+                    <section id="ie_service">
+                        <div class="container">
+                            <div class="heading_title">
+                                <h3 class="text-primary">Services</h3>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                                    <br />
+                                    incididunt ut labore et dolore magna aliqua
+                                </p>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-12">
+                                    <div class="box">
+                                        <div class="icon">
+                                            <span class="fa fa-credit-card-alt" contenteditable="true"></span>
+                                        </div>
+                                        <div class="content">
+                                            <h3>Online Payment</h3>
+                                            <p>Lorem ipsum dolor sit amet consectetur edipiscing elit</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-12">
+                                    <div class="box">
+                                        <div class="icon">
+                                            <span class="fa fa-phone" contenteditable="true"></span>
+                                        </div>
+                                        <div class="content">
+                                            <h3>Customer Service</h3>
+                                            <p>Lorem ipsum dolor sit amet consectetur edipiscing elit</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-12">
+                                    <div class="box">
+                                        <div class="icon">
+                                            <span class="fa fa-bus" contenteditable="true"></span>
+                                        </div>
+                                        <div class="content">
+                                            <h3>Online Booking</h3>
+                                            <p>Lorem ipsum dolor sit amet consectetur edipiscing elit</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-12 col-12">
+                                    <div class="box">
+                                        <div class="icon">
+                                            <span class="fa fa-percent" contenteditable="true"></span>
+                                        </div>
+                                        <div class="content">
+                                            <h3>Regular Offers</h3>
+                                            <p>Lorem ipsum dolor sit amet consectetur edipiscing elit</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- End Service -->
+                    <!-- counter -->
+                    <section id="ie_counter_section">
+                        <div class="bg_img">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row">
+                                            <div class="col-lg-3 col-md-6">
+                                                <div class="ie_counter_box">
+                                                    <div class="icon">
+                                                        <span class="fa fa-bus" contenteditable="true"></span>
+                                                    </div>
+                                                    <span class="ie_count_name o_default_snippet_text" data-number="100">100</span>
+                                                    <p class="o_default_snippet_text ie_count_text">BUSES</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6">
+                                                <div class="ie_counter_box">
+                                                    <div class="icon">
+                                                        <span class="fa fa-road" contenteditable="true"></span>
+                                                    </div>
+                                                    <span class="ie_count_name o_default_snippet_text" data-number="30">30</span>
+                                                    <p class="o_default_snippet_text ie_count_text">ROUTES</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6">
+                                                <div class="ie_counter_box">
+                                                    <div class="icon">
+                                                        <span class="fa fa-user" contenteditable="true"></span>
+                                                    </div>
+                                                    <span class="ie_count_name o_default_snippet_text" data-number="1000">1000</span>
+                                                    <p class="o_default_snippet_text ie_count_text">CUSTOMERS</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6">
+                                                <div class="ie_counter_box">
+                                                    <div class="icon">
+                                                        <span class="fa fa-ticket" contenteditable="true"></span>
+                                                    </div>
+                                                    <span class="ie_count_name o_default_snippet_text" data-number="2000">2000</span>
+                                                    <p class="o_default_snippet_text ie_count_text">TICKETS SOLD</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Testimonial -->
+                    <section id="ie_testimonial">
+                        <div class="container">
+                            <div class="heading_title">
+                                <h3 class="text-primary">Testimonial</h3>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                                    <br/> incididunt ut labore et dolore magna aliqua
+                                </p>
+                            </div>
+                            <div class="owl-carousel owl-theme">
+                                <div class="item">
+                                    <div class="media d-flex">
+                                        <div class="flex-shrink-0">
+                                            <img class="align-self-start mr-3" src="/ie_bus_web/static/src/img/t1.jpeg" alt="image" />
+                                        </div>
+                                        <div class="flex-grow-1 ms-3 media-body">
+                                            <h4 class="mt-0">Lorem Ipsum</h4>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="item">
+                                    <div class="media d-flex">
+                                        <div class="flex-shrink-0">
+                                            <img class="align-self-start mr-3" src="/ie_bus_web/static/src/img/t2.jpeg" alt="image" />
+                                        </div>
+                                        <div class="flex-grow-1 ms-3 media-body">
+                                            <h4 class="mt-0">Lorem Ipsum</h4>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- End Testimonial -->
+                    <!-- Call_to_action -->
+                    <section id="ie_call_to_action">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-12 col-sm-12 col-12">
+                                    <h3>Make Your Reservation</h3>
+                                    <p>Lorem ipsum dolor sit amet consectetur adipiscing elit</p>
+                                </div>
+                                <div class="col-lg-6 col-md-12 col-sm-12 col-12 pt15">
+                                    <a href="contactus" class="btn btn_contact_us">Contact Us</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </t>
+                <t t-else="">
+                    <t t-if="search_ids">
+                        <section id="ie_bus_banner_page2">
+                            <div class="box">
+                                <div class="container">
+                                    <form id="registration_form1" t-attf-action="/busBooking" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                                        <div class="row">
+                                            <div class="col-lg-3 col-md-6 col-sm-12 col-12 text-center" style="position: relative;">
+                                                <select name="start_point" id="start_point" class="selectpicker" required="required">
+                                                    <option value="" disabled="disabled">Choose Start Point</option>
+                                                    <t t-foreach="points" t-as="point">
+                                                        <option t-att-selected="'selected' if  int(from_loc) == int(point.id) else None" t-att-value="point.id">
+                                                            <t t-esc="point.name" />
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                                <span class="fa fa-caret-down"></span>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 col-sm-12 col-12 text-center" style="position: relative;">
+                                                <select name="end_point" id="end_point" class="selectpicker" required="required">
+                                                    <option value="" disabled="disabled">Choose End Point</option>
+                                                    <t t-foreach="to_points" t-as="to_point">
+                                                        <option t-att-selected="'selected' if int(to_loc) == int(to_point.id) else None" t-att-value="to_point.id">
+                                                            <t t-esc="to_point.name" />
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                                <span class="fa fa-caret-down"></span>
+                                            </div>
+                                            <div class="col-lg-2 col-md-6 col-sm-12 col-12 text-center">
+                                                <t t-set="minimum_date" t-value="str((datetime.datetime.now()).strftime('%Y-%m-%d'))" />
+                                                <input type="date" t-att-value="search_date" t-att-min="str(minimum_date)" name="date" id="datepicker" placeholder="Date" class="form-control" required="required"></input>
+                                            </div>
+                                            <div class="col-lg-2 col-md-6 col-sm-12 col-12 text-center pl10 pr10" style="position: relative;">
+                                                <select name="fleet_type" id="fleet_type" class="selectpicker">
+                                                    <t t-if="fleet_type">
+                                                        <option value="">Choose Fleet Type</option>
+                                                        <t t-foreach="bus_types" t-as="bus_type">
+                                                            <option t-att-selected="'selected' if fleet_type and int(fleet_type) == int(bus_type.id) else None" t-att-value="bus_type.id">
+                                                                <t t-esc="bus_type.name" />
+                                                            </option>
+                                                        </t>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <option value="" disabled="disabled" selected="selected">Choose Fleet Type</option>
+                                                        <t t-foreach="bus_types" t-as="bus_type">
+                                                            <option t-att-value="bus_type.id">
+                                                                <t t-esc="bus_type.name" />
+                                                            </option>
+                                                        </t>
+                                                    </t>
+                                                </select>
+                                                <span class="fa fa-caret-down"></span>
+                                            </div>
+                                            <div class="col-lg-2 col-md-12 col-sm-12 col-12 text-center">
+                                                <button type="submit" class="btn btn_search">Search</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="ie_bus_booking_detail_table">
+                            <div class="container">
+                                <t t-foreach="search_ids" t-as="search_id">
+                                    <div class="ie_bus_detail_box">
+                                        <div class="row ms-0 me-0">
+                                            <div class="col-lg-4 col-md-5 col-sm-12 col-xs-12">
+                                                <div class="box">
+                                                    <div class="ie_route_div d-flex">
+                                                        <label class="ie_lbl w-20">Route : </label>
+                                                        <span class="ie_val w-80"><t t-esc="search_id.route.baording_id.name" /> - <t t-esc="search_id.route.dropping_id.name" /></span>
+                                                    </div>
+                                                    <div class="ie_from_div d-flex">
+                                                        <label class="ie_lbl w-20">From : </label>
+                                                        <span class="ie_val w-80"><t t-esc="search_id.bording_from.name" /></span>
+                                                    </div>
+                                                    <div class="ie_from_div d-flex">
+                                                        <label class="ie_lbl w-20">To : </label>
+                                                        <span class="ie_val w-80"><t t-esc="search_id.to.name" /></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-3 col-sm-12 col-xs-12">
+                                                <div class="box ie_daparture_box_div">
+                                                    <div class="ie_departure_div d-flex">
+                                                        <label class="ie_lbl w-28">Departure : </label>
+                                                        <span class="ie_val w-72"><t t-esc="search_id.trip_start_date" t-options="{'widget': 'float_time'}" /></span>
+                                                    </div>
+                                                    <div class="ie_arrival_div d-flex">
+                                                        <label class="ie_lbl w-28">Arrival : </label>
+                                                        <span class="ie_val w-72"><t t-esc="search_id.trip_end_date" t-options="{'widget': 'float_time'}" /></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                                <div class="box ie_total_seat_box_div">
+                                                    <div class="ie_total_seat_div d-flex">
+                                                        <label class="ie_lbl w-40">Total Seats : </label>
+                                                        <span class="ie_val w-60"><t t-esc="search_id.total_seat" /></span>
+                                                    </div>
+                                                    <div class="ie_seat_booked_div d-flex">
+                                                        <label class="ie_lbl w-40">Seat Booked : </label>
+                                                        <span class="ie_val w-60"><t t-esc="search_id.seat_booked" /></span>
+                                                    </div>
+                                                    <div class="ie_remaining_seat_div d-flex">
+                                                        <label class="ie_lbl w-40">Remaining Seats : </label>
+                                                        <span class="ie_val w-60"><t t-esc="search_id.remaining_seats" /></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row ms-0 me-0 text-center">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div class="box pt-0">
+                                                    <div class="ie_price_div mb-2">
+                                                        <label class="ie_lbl">Price : </label>
+                                                        <span class="ie_val"><t t-esc="search_id.price" /></span>
+                                                    </div>
+                                                    <div class="ie_book_btn_div">
+                                                        <span class="ie_btn"><a href="#" class="btn btn-primary book_ticket" data-bs-toggle="modal"
+                                                            t-att-data-bs-target="'#myModal%s00' %(search_id.id)" t-att-data-id="'%s' %(search_id.id)">Book</a>
+                                                        <t t-call="ie_bus_web.seat_booking_template"></t></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+
+                            </div>
+                        </section>
+                    </t>
+                    <t t-else="">
+                        <section id="ie_result_notfound_banner">
+                            <div class="box">
+                                <div class="container">
+                                    <h3>No Result Found !</h3>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+                </t>
+                <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_bus_booking_2" />
+            </div>
+        </t>
+    </template>
+</odoo>

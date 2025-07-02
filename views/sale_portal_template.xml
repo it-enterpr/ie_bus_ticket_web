@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="ie_bus_web_inherit_payment" name="Bus Ticket" inherit_id="sale.sale_order_portal_template">
+    <xpath expr="//div[hasclass('o_download_pdf')]" position="after">    
+        <div class="btn-group flex-grow-1" t-if="sale_order.invoice_status == 'invoiced'" style="display: block;">
+            <a class="btn btn-secondary btn-block o_download_btn" target="blank" t-att-href="sale_order.get_portal_movie_url(report_type='pdf', download=True)" title="Download">
+                <i class="fa fa-download" />
+                Print Ticket
+            </a>
+        </div>
+    </xpath>
+</template>
+</odoo>
